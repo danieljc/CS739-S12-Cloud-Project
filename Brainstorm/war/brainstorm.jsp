@@ -18,57 +18,7 @@
   <body>
 
 <%
-    String brainstormName = request.getParameter("brainstormName");
-    if (brainstormName == null) {
-        brainstormName = "default";
-    }
-    UserService userService = UserServiceFactory.getUserService();
-    User user = userService.getCurrentUser();
-    if (user != null) {
-%>
-<p>Hello, <%= user.getNickname() %>! (You can
-<a href="<%= userService.createLogoutURL(request.getRequestURI()) %>">sign out</a>.)</p>
-<%
-    } else {
-%>
-<p>Hello!
-<a href="<%= userService.createLoginURL(request.getRequestURI()) %>">Sign in</a>
-to include your name with greetings you post.</p>
-<%
-    }
-%>
-
-
-<%
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Key brainstormKey = KeyFactory.createKey("Brainstorm", brainstormName);
-    // Run an ancestor query to ensure we see the most up-to-date
-    // view of the Greetings belonging to the selected Brainstorm.
-    Query query = new Query("Greeting", brainstormKey).addSort("date", Query.SortDirection.DESCENDING);
-    List<Entity> greetings = datastore.prepare(query).asList(FetchOptions.Builder.withLimit(5));
-    if (greetings.isEmpty()) {
-        %>
-        <p>Brainstorm '<%= brainstormName %>' has no messages.</p>
-        <%
-    } else {
-        %>
-        <p>Messages in Brainstorm '<%= brainstormName %>'.</p>
-        <%
-        for (Entity greeting : greetings) {
-            if (greeting.getProperty("user") == null) {
-                %>
-                <p>An anonymous person wrote:</p>
-                <%
-            } else {
-                %>
-                <p><b><%= ((User) greeting.getProperty("user")).getNickname() %></b> wrote:</p>
-                <%
-            }
-            %>
-            <blockquote><%= greeting.getProperty("content") %></blockquote>
-            <%
-        }
-    }
+String brainstormName = "QuestionText";
 %>
 
     <form action="/sign" method="post">
@@ -76,6 +26,30 @@ to include your name with greetings you post.</p>
       <div><input type="submit" value="Post Greeting" /></div>
       <input type="hidden" name="brainstormName" value="<%= brainstormName %>"/>
     </form>
+    
+<%
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Key brainstormKey = KeyFactory.createKey("Brainstorm", brainstormName);
+    // Run an ancestor query to ensure we see the most up-to-date
+    // view of the Greetings belonging to the selected Brainstorm.
+    Query query = new Query("Greeting", brainstormKey).addSort("date", Query.SortDirection.DESCENDING);
+    List<Entity> greetings = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
+    if (greetings.isEmpty()) {
+        %>
+        <p>No comments in '<%= brainstormName %>'.</p>
+        <%
+    } else {
+        %>
+        <p>Comments in '<%= brainstormName %>'.</p>
+        <%
+        for (Entity greeting : greetings) {
+            %>
+            <blockquote><%= greeting.getProperty("content") %></blockquote>
+            <%
+        }
+    }
+%>
+
 
   </body>
 </html>
