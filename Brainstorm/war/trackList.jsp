@@ -17,37 +17,29 @@
   </head>
   <body>
 
-<a href="../generator.jsp">Add a new questions.</a>
-
-<a href="../trackList.jsp">Track List</a>
+<a href="../brainstorm.jsp">Back</a>
 
 <%
 String brainstormName = "TopLevel"; //"QuestionText";
 
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    //Key brainstormKey = KeyFactory.createKey("Brainstorm", brainstormName);
-    Key qKey = KeyFactory.createKey("Question", "QuestionType");
-    
-    // Run an ancestor query to ensure we see the most up-to-date
-    // view of the Greetings belonging to the selected Brainstorm.
-    //Query query = new Query("Greeting", brainstormKey).addSort("date", Query.SortDirection.DESCENDING);
+    Key qKey = KeyFactory.createKey("Brainstorm", "TopLevel");
+    //Key qKey = KeyFactory.createKey("Question", "QuestionType");
 
-    Query query = new Query("Question", qKey).addSort("date", Query.SortDirection.DESCENDING);
+    Query query = new Query("Greeting", qKey).addSort("date", Query.SortDirection.DESCENDING);
     List<Entity> greetings = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
     if (greetings.isEmpty()) {
         %>
-        <p>No questions in store.</p>
+        <p>No tracks in store.</p>
         <%
     } else {
         %>
-        <p>Active Questions</p>
+        <p>Tracks</p>
         <%
         for (Entity greeting : greetings) {
             %>
-            <blockquote><a href="../trackAdder.jsp?QID=<%= greeting.getProperty("content").hashCode() %>">
-            <%= greeting.getProperty("content") %></a></blockquote>
-            <blockquote><%= greeting.getProperty("date") %></blockquote>
+            <blockquote><%= greeting.getProperty("content") %></blockquote>
             <%
         }
     }

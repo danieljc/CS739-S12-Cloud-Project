@@ -28,40 +28,68 @@ public class SignServlet extends HttpServlet {
 
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
                 throws IOException {
-        UserService userService = UserServiceFactory.getUserService();
-        User user = userService.getCurrentUser();
+    	
+    	String linkID = req.getParameter("linkID");
+    	if(linkID.equals("new question")){
+    		Key qKey = KeyFactory.createKey("Question", "QuestionType");
+    		String content = req.getParameter("content");
+            Date date = new Date();
+            Integer timeout = Integer.parseInt(req.getParameter("timeout"));
+            
+            Entity question = new Entity("Question", qKey);
+            
+            question.setProperty("date", date);
+            question.setProperty("content", content);
+            question.setProperty("timeout", timeout);
+            
+            DatastoreService datastore =
+                    DatastoreServiceFactory.getDatastoreService();
+            datastore.put(question);
 
-        // We have one entity group per Guestbook with all Greetings residing
-        // in the same entity group as the Guestbook to which they belong.
-        // This lets us run an ancestor query to retrieve all Greetings for a
-        // given Guestbook. However, the write rate to each Guestbook should be
-        // limited to ~1/second.
+            resp.sendRedirect("/brainstorm.jsp");
+            return;
+    	}else if(linkID.equals("track")){
+    		Key qKey = KeyFactory.createKey("Question", "QuestionType");
+    		String content = req.getParameter("content");
+            Date date = new Date();
+            Integer timeout = Integer.parseInt(req.getParameter("timeout"));
+            
+            Entity question = new Entity("Question", qKey);
+            
+            question.setProperty("date", date);
+            question.setProperty("content", content);
+            question.setProperty("timeout", timeout);
+            
+            DatastoreService datastore =
+                    DatastoreServiceFactory.getDatastoreService();
+            datastore.put(question);
+
+            resp.sendRedirect("/brainstorm.jsp?lid=wtf");
+            return;
+    	}
+    	
         String brainstormName = req.getParameter("brainstormName");
         Key brainstormKey = KeyFactory.createKey("Brainstorm", brainstormName);
+
         String content = req.getParameter("content");
         Date date = new Date();
+        Integer timeout = Integer.parseInt(req.getParameter("timeout"));
+        
         Entity greeting = new Entity("Greeting", brainstormKey);
-        greeting.setProperty("user", user);
+
         greeting.setProperty("date", date);
         greeting.setProperty("content", content);
+        greeting.setProperty("timeout", timeout);
+        greeting.setProperty("linkID", linkID);
 
         DatastoreService datastore =
                 DatastoreServiceFactory.getDatastoreService();
         datastore.put(greeting);
 
-        resp.sendRedirect("/brainstorm.jsp?brainstormName="
-                + brainstormName);
+        resp.sendRedirect("/brainstorm.jsp?lid="+linkID);
+        		//+ "?brainstormName="
+                //+ brainstormName);
 
         
-//        String content = req.getParameter("content");
-//        if (content == null) {
-//            content = "(No greeting)";
-//        }
-//        if (user != null) {
-//            log.info("Greeting posted by user " + user.getNickname() + ": " + content);
-//        } else {
-//            log.info("Greeting posted anonymously: " + content);
-//        }
-//        resp.sendRedirect("/guestbook.jsp");
     }
 }
